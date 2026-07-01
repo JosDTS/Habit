@@ -83,7 +83,10 @@ export default function AmigosScreen() {
       }
 
       try {
-        const { usuarios: resultados } = await buscarUsuarios(texto, user.uid);
+        const { usuarios: resultados, error } = await buscarUsuarios(texto, user.uid);
+        if (error) {
+          console.error("Error en búsqueda (Firestore):", error);
+        }
         // Descarta la respuesta si el usuario ya siguió escribiendo:
         // evita que una búsqueda vieja y más lenta pise resultados más recientes.
         if (busquedaActualRef.current === texto) {
