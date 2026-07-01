@@ -67,6 +67,9 @@ export const obtenerInsigniasConEstado = async (uid, perfil) => {
       } else if (insignia.criterioTipo === "categoriaRachaDias") {
         progresoActual = await calcularRachaPorCategoria(uid, insignia.criterioCategoria);
         desbloqueada = progresoActual >= insignia.criterioValor;
+      } else if (insignia.criterioTipo === "puntos") {
+        progresoActual = perfil?.puntos ?? 0;
+        desbloqueada = progresoActual >= insignia.criterioValor;
       }
 
       insigniasEvaluadas.push({ ...insignia, progresoActual, desbloqueada });

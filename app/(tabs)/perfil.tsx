@@ -69,6 +69,9 @@ export default function PerfilScreen() {
   };
 
   const handleOpcionMenu = (id) => {
+    if (id === "notificaciones") {
+      router.push("/notificaciones");
+    }
   };
 
   if (cargando) {
@@ -80,7 +83,7 @@ export default function PerfilScreen() {
   }
 
   const nombre = perfil?.nombre || user?.email?.split("@")[0] || "Usuario";
-  const universidad = perfil?.universidad || "Sin universidad";
+  const universidad = perfil?.universidad || "";
   const fotoUrl = perfil?.fotoUrl
     ? perfil.fotoUrl
     : `${AVATAR_DEFAULT}&name=${encodeURIComponent(nombre)}`;

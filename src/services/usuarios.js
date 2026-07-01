@@ -1,5 +1,6 @@
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import { calcularNivel } from "./logros";
 
 export const crearPerfilUsuario = async (uid, datos) => {
   try {
@@ -47,7 +48,7 @@ export const sumarPuntos = async (uid, puntosGanados) => {
     if (error) return { error };
 
     const nuevosPuntos = (perfil.puntos || 0) + puntosGanados;
-    const nuevoNivel = Math.floor(nuevosPuntos / 100) + 1;
+    const { nivel: nuevoNivel } = calcularNivel(nuevosPuntos);
 
     await updateDoc(doc(db, "usuarios", uid), {
       puntos: nuevosPuntos,

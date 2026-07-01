@@ -3,6 +3,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth } from "../../firebaseConfig";
 import { crearPerfilUsuario } from "./usuarios";
@@ -56,4 +57,13 @@ export const logoutUser = async () => {
 
 export const subscribeToAuthChanges = (callback) => {
   return onAuthStateChanged(auth, callback);
+};
+
+export const enviarCorreoRecuperacion = async (email) => {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    return { error: null };
+  } catch (error) {
+    return { error: error.message };
+  }
 };

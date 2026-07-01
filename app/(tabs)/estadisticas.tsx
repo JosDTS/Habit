@@ -20,6 +20,9 @@ const ICONOS_CATEGORIA = {
   ejercicio: "🏃",
   sueno: "🌙",
   alimentacion: "🍎",
+  meditacion: "🧘",
+  lectura: "📖",
+  pasos: "👣",
 };
 
 const NOMBRES_CATEGORIA = {
@@ -27,6 +30,9 @@ const NOMBRES_CATEGORIA = {
   ejercicio: "Ejercicio",
   sueno: "Sueño",
   alimentacion: "Alimentación",
+  meditacion: "Meditación",
+  lectura: "Lectura",
+  pasos: "Pasos",
 };
 
 export default function EstadisticasScreen() {

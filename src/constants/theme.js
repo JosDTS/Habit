@@ -17,6 +17,8 @@ export const COLORS = {
     sueno: "#5C6BC0",
     alimentacion: "#43A047",
     meditacion: "#8E24AA",
+    lectura: "#6D4C41",
+    pasos: "#00897B",
   },
 };
 

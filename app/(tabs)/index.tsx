@@ -13,6 +13,12 @@ import { useAuth } from "../../src/context/AuthContext";
 import { obtenerPerfilUsuario } from "../../src/services/usuarios";
 import { obtenerRetosDeHoy, incrementarProgresoReto } from "../../src/services/retos";
 import { useRecargarAlCambiarDia } from "../../src/hooks/useRecargarAlCambiarDia";
+import {
+  obtenerClimaActual,
+  elegirFraseClima,
+  DECORACION_CLIMA,
+  UBICACION_DEFECTO,
+} from "../../src/services/clima";
 import { COLORS, SIZES } from "../../src/constants/theme";
 
 const ICONOS_CATEGORIA = {
@@ -20,6 +26,9 @@ const ICONOS_CATEGORIA = {
   ejercicio: "🏃",
   sueno: "🌙",
   alimentacion: "🍎",
+  meditacion: "🧘",
+  lectura: "📖",
+  pasos: "👣",
 };
 
 export default function HomeScreen() {
@@ -30,6 +39,9 @@ export default function HomeScreen() {
   const [retos, setRetos] = useState([]);
   const [cargandoRetos, setCargandoRetos] = useState(true);
   const [actualizandoId, setActualizandoId] = useState(null);
+  const [clima, setClima] = useState(null);
+  const [fraseClima, setFraseClima] = useState("");
+  const [cargandoClima, setCargandoClima] = useState(true);
 
   const cargarDatos = useCallback(async () => {
     if (!user) return;
@@ -46,6 +58,21 @@ export default function HomeScreen() {
   useEffect(() => {
     cargarDatos();
   }, [cargarDatos]);
+
+  useEffect(() => {
+    const cargarClima = async () => {
+      const { clima: datosClima } = await obtenerClimaActual(
+        UBICACION_DEFECTO.lat,
+        UBICACION_DEFECTO.lon
+      );
+      if (datosClima) {
+        setClima(datosClima);
+        setFraseClima(elegirFraseClima(datosClima.categoria));
+      }
+      setCargandoClima(false);
+    };
+    cargarClima();
+  }, []);
 
   useRecargarAlCambiarDia(cargarDatos);
 
@@ -86,10 +113,53 @@ export default function HomeScreen() {
           <Text style={styles.saludo}>Buenos días</Text>
           <Text style={styles.nombre}>{nombre}</Text>
         </View>
-        <TouchableOpacity style={styles.botonNotificacion}>
+        <TouchableOpacity
+          style={styles.botonNotificacion}
+          onPress={() => router.push("/notificaciones")}
+        >
           <Text style={{ fontSize: 18 }}>🔔</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Tarjeta de clima */}
+      {!cargandoClima && clima && (
+        <View
+          style={[
+            styles.tarjetaClima,
+            { backgroundColor: DECORACION_CLIMA[clima.categoria].colorClaro },
+          ]}
+        >
+          <View style={styles.filaClima}>
+            <View
+              style={[
+                styles.iconoClimaCirculo,
+                { backgroundColor: DECORACION_CLIMA[clima.categoria].color },
+              ]}
+            >
+              <Text style={styles.emojiClima}>
+                {DECORACION_CLIMA[clima.categoria].emoji}
+              </Text>
+            </View>
+            <View style={styles.infoClima}>
+              <View style={styles.filaTemperatura}>
+                <Text style={styles.temperaturaClima}>
+                  {clima.temperatura}°
+                </Text>
+                <Text
+                  style={[
+                    styles.nombreClima,
+                    { color: DECORACION_CLIMA[clima.categoria].color },
+                  ]}
+                >
+                  {DECORACION_CLIMA[clima.categoria].nombre}
+                </Text>
+              </View>
+              <Text style={styles.ubicacionClima}>{UBICACION_DEFECTO.nombre}</Text>
+            </View>
+          </View>
+          <Text style={styles.fraseClima}>{fraseClima}</Text>
+        </View>
+      )}
 
       {/* Tarjeta de racha */}
       <View style={styles.tarjetaRacha}>
@@ -256,6 +326,60 @@ const styles = StyleSheet.create({
     backgroundColor: "#E7F1F1",
     alignItems: "center",
     justifyContent: "center",
+  },
+  tarjetaClima: {
+    borderRadius: SIZES.radius,
+    padding: 18,
+    marginBottom: 20,
+  },
+  filaClima: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  iconoClimaCirculo: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  emojiClima: {
+    fontSize: 26,
+  },
+  infoClima: {
+    flex: 1,
+  },
+  filaTemperatura: {
+    flexDirection: "row",
+    alignItems: "baseline",
+  },
+  temperaturaClima: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginRight: 8,
+  },
+  nombreClima: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  ubicacionClima: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginTop: 2,
+  },
+  fraseClima: {
+    fontSize: 14,
+    color: COLORS.text,
+    lineHeight: 20,
+    fontStyle: "italic",
   },
   tarjetaRacha: {
     backgroundColor: COLORS.primary,

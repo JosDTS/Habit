@@ -8,6 +8,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { sumarPuntos } from "./usuarios";
+import { crearNotificacion } from "./notificaciones";
 
 function fechaDeHoy() {
   return new Date().toISOString().split("T")[0];
@@ -78,6 +79,10 @@ export const incrementarProgresoReto = async (uid, reto) => {
 
     if (seAcabaDeCompletar) {
       await sumarPuntos(uid, reto.puntosOtorga);
+      await crearNotificacion(uid, {
+        titulo: "¡Reto completado!",
+        descripcion: `Completaste "${reto.titulo}" y ganaste +${reto.puntosOtorga} puntos.`,
+      });
     }
 
     return {

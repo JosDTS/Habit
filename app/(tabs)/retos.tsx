@@ -20,6 +20,9 @@ const ICONOS_CATEGORIA = {
   ejercicio: "🏃",
   sueno: "🌙",
   alimentacion: "🍎",
+  meditacion: "🧘",
+  lectura: "📖",
+  pasos: "👣",
 };
 
 export default function RetosScreen() {
