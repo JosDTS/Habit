@@ -1,5 +1,4 @@
-
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,14 +9,12 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useFocusEffect } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useAuth } from "../../src/context/AuthContext";
 import { obtenerPerfilUsuario } from "../../src/services/usuarios";
 import { logoutUser } from "../../src/services/auth";
 import { calcularNivel } from "../../src/services/logros";
 import { COLORS, SIZES } from "../../src/constants/theme";
-
 
 const AVATAR_DEFAULT =
   "https://ui-avatars.com/api/?background=009951&color=fff&size=128&bold=true";
@@ -69,8 +66,27 @@ export default function PerfilScreen() {
   };
 
   const handleOpcionMenu = (id) => {
-    if (id === "notificaciones") {
-      router.push("/notificaciones");
+    switch (id) {
+      case "historial":
+        router.push("/historial");
+        break;
+      case "premios":
+        router.push("/premios");
+        break;
+      case "amigos":
+        router.push("/amigos");
+        break;
+      case "configuracion":
+        router.push("/configuracion");
+        break;
+      case "ayuda":
+        router.push("/ayuda");
+        break;
+      case "notificaciones":
+        router.push("/notificaciones");
+        break;
+      default:
+        break;
     }
   };
 
@@ -83,7 +99,7 @@ export default function PerfilScreen() {
   }
 
   const nombre = perfil?.nombre || user?.email?.split("@")[0] || "Usuario";
-  const universidad = perfil?.universidad || "";
+  const universidad = perfil?.universidad || "Sin universidad";
   const fotoUrl = perfil?.fotoUrl
     ? perfil.fotoUrl
     : `${AVATAR_DEFAULT}&name=${encodeURIComponent(nombre)}`;
@@ -99,9 +115,7 @@ export default function PerfilScreen() {
     >
       <Text style={styles.tituloPantalla}>Perfil</Text>
 
-      {/* Tarjeta principal */}
       <View style={styles.tarjetaPerfil}>
-        {/* Foto y botón de editar */}
         <View style={styles.contenedorFoto}>
           <Image
             source={{ uri: fotoUrl }}
@@ -119,7 +133,6 @@ export default function PerfilScreen() {
         <Text style={styles.nombre}>{nombre}</Text>
         <Text style={styles.universidad}>{universidad}</Text>
 
-        {/* Stats */}
         <View style={styles.filaStats}>
           <View style={styles.stat}>
             <Text style={styles.valorStat}>{nivel}</Text>
@@ -138,7 +151,6 @@ export default function PerfilScreen() {
         </View>
       </View>
 
-      {/* Menú de opciones */}
       <View style={styles.menu}>
         {OPCIONES_MENU.map((opcion, index) => (
           <TouchableOpacity
@@ -157,7 +169,6 @@ export default function PerfilScreen() {
         ))}
       </View>
 
-      {/* Cerrar sesión */}
       <TouchableOpacity style={styles.botonCerrarSesion} onPress={handleCerrarSesion}>
         <Text style={styles.iconoMenu}>🚪</Text>
         <Text style={styles.labelCerrarSesion}>Cerrar Sesión</Text>

@@ -3,7 +3,6 @@ import { db } from "../../firebaseConfig";
 
 const DIAS_SEMANA = ["D", "L", "M", "X", "J", "V", "S"]; 
 
-
 function ultimasFechas(n) {
   const fechas = [];
   for (let i = n - 1; i >= 0; i--) {
@@ -104,12 +103,12 @@ export const obtenerEstadisticasPorCategoria = async (uid) => {
           ((promedioReciente - promedioAnterior) / promedioAnterior) * 100
         );
       } else if (promedioReciente > 0) {
-        tendenciaPorcentaje = 100; // de 0 a algo: mejora del 100%
+        tendenciaPorcentaje = 100;
       }
 
       return {
         categoria,
-        promedio: Math.round(promedioGeneral * 10) / 10, // 1 decimal
+        promedio: Math.round(promedioGeneral * 10) / 10,
         unidad: registros[0]?.unidad || "",
         tendenciaPorcentaje,
       };

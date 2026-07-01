@@ -92,7 +92,6 @@ export default function RetosScreen() {
       <Text style={styles.titulo}>Retos Diarios</Text>
       <Text style={styles.subtitulo}>Completa retos para ganar puntos</Text>
 
-      {/* Resumen del día */}
       <View style={styles.tarjetaResumen}>
         <View>
           <Text style={styles.etiquetaResumen}>Progreso de hoy</Text>
@@ -106,7 +105,6 @@ export default function RetosScreen() {
         </View>
       </View>
 
-      {/* Lista de retos */}
       {retos.map((reto) => {
         const porcentaje = Math.round(
           (reto.progresoActual / reto.metaValor) * 100

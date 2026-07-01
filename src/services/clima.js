@@ -1,6 +1,3 @@
-// Ciudad por defecto: San José, Costa Rica.
-// Si más adelante se agrega geolocalización real (expo-location),
-// estas coordenadas se pueden reemplazar por la ubicación del usuario.
 export const UBICACION_DEFECTO = {
   lat: 9.9281,
   lon: -84.0907,

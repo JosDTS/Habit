@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -80,7 +79,6 @@ export default function LogrosScreen() {
     >
       <Text style={styles.titulo}>Insignias y Niveles</Text>
 
-      {/* Tarjeta de nivel */}
       <View style={[styles.tarjetaNivel, { backgroundColor: MORADO_NIVEL }]}>
         <View style={styles.circuloNivel}>
           <Text style={styles.numeroNivel}>{nivel}</Text>
@@ -97,7 +95,6 @@ export default function LogrosScreen() {
         </View>
       </View>
 
-      {/* Progreso de nivel (indicador visual de niveles pasados/futuros) */}
       <Text style={styles.tituloSeccion}>Progreso de nivel</Text>
       <View style={styles.filaNiveles}>
         {Array.from({ length: 5 }).map((_, i) => {
@@ -120,7 +117,6 @@ export default function LogrosScreen() {
         <Text style={styles.etiquetaNivelExtremo}>Nv 25</Text>
       </View>
 
-      {/* Insignias */}
       <Text style={styles.tituloSeccion}>
         Insignias ({desbloqueadas}/{insignias.length})
       </Text>

@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, setDoc, getDoc } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 
 const XP_POR_NIVEL = 200;

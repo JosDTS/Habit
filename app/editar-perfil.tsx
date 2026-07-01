@@ -10,7 +10,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
-  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../src/context/AuthContext";
@@ -77,7 +76,6 @@ export default function EditarPerfilScreen() {
     );
   }
 
-  // Preview de la foto si el URL es válido
   const urlFotoValida = fotoUrl.trim().startsWith("http");
 
   return (
@@ -89,7 +87,6 @@ export default function EditarPerfilScreen() {
         style={styles.container}
         contentContainerStyle={styles.contenido}
       >
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.botonVolver}>
             <Text style={styles.botonVolverTexto}>← Volver</Text>
@@ -97,7 +94,6 @@ export default function EditarPerfilScreen() {
           <Text style={styles.titulo}>Editar Perfil</Text>
         </View>
 
-        {/* Preview de foto */}
         <View style={styles.contenedorPreview}>
           {urlFotoValida ? (
             <Image source={{ uri: fotoUrl.trim() }} style={styles.fotoPreview} />
@@ -109,7 +105,6 @@ export default function EditarPerfilScreen() {
           <Text style={styles.etiquetaPreview}>Vista previa de foto</Text>
         </View>
 
-        {/* Formulario */}
         <Text style={styles.etiqueta}>Nombre completo</Text>
         <TextInput
           style={styles.input}

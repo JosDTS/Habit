@@ -107,7 +107,6 @@ export default function HomeScreen() {
       style={styles.container}
       contentContainerStyle={styles.contenido}
     >
-      {/* Encabezado: saludo y nombre */}
       <View style={styles.encabezado}>
         <View>
           <Text style={styles.saludo}>Buenos días</Text>
@@ -121,7 +120,6 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Tarjeta de clima */}
       {!cargandoClima && clima && (
         <View
           style={[
@@ -161,7 +159,6 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {/* Tarjeta de racha */}
       <View style={styles.tarjetaRacha}>
         <Text style={styles.textoRacha}>{rachaDias} días</Text>
         <Text style={{ fontSize: 24 }}>🔥</Text>
@@ -180,7 +177,6 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Retos de hoy */}
       <View style={styles.filaTitulo}>
         <Text style={styles.tituloSeccion}>Retos de hoy</Text>
         <TouchableOpacity onPress={() => router.push("/(tabs)/retos")}>
@@ -235,7 +231,6 @@ export default function HomeScreen() {
         })
       )}
 
-      {/* Resumen semanal */}
       <Text style={styles.tituloResumen}>Resumen semanal</Text>
       <View style={styles.filaResumen}>
         <View style={styles.tarjetaResumen}>

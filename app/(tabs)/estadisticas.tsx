@@ -60,8 +60,6 @@ export default function EstadisticasScreen() {
     cargarDatos();
   }, [cargarDatos]);
 
-  // Si la app estuvo en segundo plano y al volver ya es otro día,
-  // se recalculan las estadísticas con la nueva ventana de 7 días.
   useRecargarAlCambiarDia(cargarDatos);
 
   const handleRefrescar = () => {
@@ -88,7 +86,6 @@ export default function EstadisticasScreen() {
       <Text style={styles.titulo}>Estadísticas</Text>
       <Text style={styles.subtitulo}>Tu progreso semanal</Text>
 
-      {/* Cumplimiento semanal */}
       <View style={styles.tarjetaCumplimiento}>
         <View style={styles.filaTituloTarjeta}>
           <Text style={styles.tituloTarjeta}>Cumplimiento semanal</Text>
@@ -121,7 +118,6 @@ export default function EstadisticasScreen() {
         </View>
       </View>
 
-      {/* Por hábito */}
       <Text style={styles.tituloSeccion}>Por hábito</Text>
 
       {categorias.length === 0 ? (
