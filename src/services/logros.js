@@ -1,5 +1,6 @@
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import { fechaLocalTexto } from "../utils/fecha";
 
 const XP_POR_NIVEL = 200;
 
@@ -16,6 +17,29 @@ export function calcularNivel(puntosTotal) {
   };
 }
 
+export async function calcularRachaGlobal(uid) {
+  const refSubcoleccion = collection(db, "usuarios", uid, "retosActivos");
+  const snapshot = await getDocs(refSubcoleccion);
+  const registros = snapshot.docs.map((d) => d.data()).filter((r) => r.completado);
+
+  const fechasCompletadas = new Set(registros.map((r) => r.fecha));
+
+  let racha = 0;
+  for (let i = 0; i < 365; i++) {
+    const fecha = new Date();
+    fecha.setDate(fecha.getDate() - i);
+    const fechaTexto = fechaLocalTexto(fecha);
+
+    if (fechasCompletadas.has(fechaTexto)) {
+      racha++;
+    } else {
+      break;
+    }
+  }
+
+  return racha;
+}
+
 async function calcularRachaPorCategoria(uid, categoria) {
   const refSubcoleccion = collection(db, "usuarios", uid, "retosActivos");
   const snapshot = await getDocs(refSubcoleccion);
@@ -29,7 +53,7 @@ async function calcularRachaPorCategoria(uid, categoria) {
   for (let i = 0; i < 365; i++) {
     const fecha = new Date();
     fecha.setDate(fecha.getDate() - i);
-    const fechaTexto = fecha.toISOString().split("T")[0];
+    const fechaTexto = fechaLocalTexto(fecha);
 
     if (fechasCompletadas.has(fechaTexto)) {
       racha++;

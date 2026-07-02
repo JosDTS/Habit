@@ -5,13 +5,17 @@ import {
   getDocs,
   setDoc,
   updateDoc,
+  deleteDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
-import { sumarPuntos } from "./usuarios";
+import { sumarPuntos, actualizarPerfilUsuario } from "./usuarios";
 import { crearNotificacion } from "./notificaciones";
+import { calcularRachaGlobal } from "./logros";
+import { fechaLocalTexto } from "../utils/fecha";
 
 function fechaDeHoy() {
-  return new Date().toISOString().split("T")[0];
+  return fechaLocalTexto();
 }
 
 export const obtenerCatalogoRetos = async () => {
@@ -24,15 +28,62 @@ export const obtenerCatalogoRetos = async () => {
   }
 };
 
+export const obtenerRetosPersonalizados = async (uid) => {
+  try {
+    const snapshot = await getDocs(
+      collection(db, "usuarios", uid, "retosPersonalizados")
+    );
+    const retos = snapshot.docs.map((d) => ({
+      retoId: d.id,
+      personalizado: true,
+      ...d.data(),
+    }));
+    return { retos, error: null };
+  } catch (error) {
+    return { retos: [], error: error.message };
+  }
+};
+
+export const crearRetoPersonalizado = async (uid, datos) => {
+  try {
+    const refDocumento = doc(collection(db, "usuarios", uid, "retosPersonalizados"));
+    await setDoc(refDocumento, {
+      titulo: datos.titulo,
+      categoria: datos.categoria,
+      metaValor: datos.metaValor,
+      unidad: datos.unidad,
+      incrementoUnidad: datos.incrementoUnidad,
+      puntosOtorga: 0,
+      creadoEn: serverTimestamp(),
+    });
+    return { error: null };
+  } catch (error) {
+    return { error: error.message };
+  }
+};
+
+export const eliminarRetoPersonalizado = async (uid, retoId) => {
+  try {
+    await deleteDoc(doc(db, "usuarios", uid, "retosPersonalizados", retoId));
+    return { error: null };
+  } catch (error) {
+    return { error: error.message };
+  }
+};
+
 export const obtenerRetosDeHoy = async (uid) => {
   try {
     const { retos: catalogo, error: errorCatalogo } = await obtenerCatalogoRetos();
     if (errorCatalogo) return { retos: [], error: errorCatalogo };
 
+    const { retos: personalizados, error: errorPersonalizados } =
+      await obtenerRetosPersonalizados(uid);
+    if (errorPersonalizados) return { retos: [], error: errorPersonalizados };
+
     const fecha = fechaDeHoy();
     const retosConProgreso = [];
 
-    for (const reto of catalogo) {
+    for (const reto of [...catalogo, ...personalizados]) {
       const idDocumento = `${reto.retoId}_${fecha}`;
       const refDocumento = doc(db, "usuarios", uid, "retosActivos", idDocumento);
       const snapshot = await getDoc(refDocumento);
@@ -79,9 +130,16 @@ export const incrementarProgresoReto = async (uid, reto) => {
 
     if (seAcabaDeCompletar) {
       await sumarPuntos(uid, reto.puntosOtorga);
+
+      const nuevaRacha = await calcularRachaGlobal(uid);
+      await actualizarPerfilUsuario(uid, { rachaDias: nuevaRacha });
+
       await crearNotificacion(uid, {
         titulo: "¡Reto completado!",
-        descripcion: `Completaste "${reto.titulo}" y ganaste +${reto.puntosOtorga} puntos.`,
+        descripcion:
+          reto.puntosOtorga > 0
+            ? `Completaste "${reto.titulo}" y ganaste +${reto.puntosOtorga} puntos.`
+            : `Completaste "${reto.titulo}".`,
       });
     }
 

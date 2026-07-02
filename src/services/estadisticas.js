@@ -1,5 +1,6 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import { fechaLocalTexto } from "../utils/fecha";
 
 const DIAS_SEMANA = ["D", "L", "M", "X", "J", "V", "S"]; 
 
@@ -8,7 +9,7 @@ function ultimasFechas(n) {
   for (let i = n - 1; i >= 0; i--) {
     const fecha = new Date();
     fecha.setDate(fecha.getDate() - i);
-    fechas.push(fecha.toISOString().split("T")[0]);
+    fechas.push(fechaLocalTexto(fecha));
   }
   return fechas;
 }

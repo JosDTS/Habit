@@ -8,9 +8,16 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  Modal,
+  TextInput,
+  Alert,
 } from "react-native";
 import { useAuth } from "../../src/context/AuthContext";
-import { obtenerRetosDeHoy, incrementarProgresoReto } from "../../src/services/retos";
+import {
+  obtenerRetosDeHoy,
+  incrementarProgresoReto,
+  crearRetoPersonalizado,
+} from "../../src/services/retos";
 import { useRecargarAlCambiarDia } from "../../src/hooks/useRecargarAlCambiarDia";
 import { COLORS, SIZES } from "../../src/constants/theme";
 
@@ -25,12 +32,30 @@ const ICONOS_CATEGORIA = {
   pasos: "👣",
 };
 
+const NOMBRES_CATEGORIA = {
+  hidratacion: "Hidratación",
+  ejercicio: "Ejercicio",
+  sueno: "Sueño",
+  alimentacion: "Alimentación",
+  meditacion: "Meditación",
+  lectura: "Lectura",
+  pasos: "Pasos",
+};
+
+const CATEGORIAS_DISPONIBLES = Object.keys(ICONOS_CATEGORIA);
+
 export default function RetosScreen() {
   const { user } = useAuth();
   const [retos, setRetos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
   const [actualizandoId, setActualizandoId] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [guardando, setGuardando] = useState(false);
+  const [tituloNuevo, setTituloNuevo] = useState("");
+  const [categoriaNueva, setCategoriaNueva] = useState(CATEGORIAS_DISPONIBLES[0]);
+  const [metaNueva, setMetaNueva] = useState("");
+  const [unidadNueva, setUnidadNueva] = useState("");
 
   const cargarRetos = useCallback(async () => {
     if (!user) return;
@@ -67,6 +92,51 @@ export default function RetosScreen() {
     );
   };
 
+  const limpiarFormulario = () => {
+    setTituloNuevo("");
+    setCategoriaNueva(CATEGORIAS_DISPONIBLES[0]);
+    setMetaNueva("");
+    setUnidadNueva("");
+  };
+
+  const handleAbrirModal = () => {
+    limpiarFormulario();
+    setModalVisible(true);
+  };
+
+  const handleGuardarRetoPersonal = async () => {
+    if (!tituloNuevo.trim() || !metaNueva.trim() || !unidadNueva.trim()) {
+      Alert.alert("Campos incompletos", "Completa el título, la meta y la unidad.");
+      return;
+    }
+
+    const metaValor = Number(metaNueva);
+
+    if (!Number.isFinite(metaValor) || metaValor <= 0) {
+      Alert.alert("Datos inválidos", "La meta debe ser un número mayor a 0.");
+      return;
+    }
+
+    setGuardando(true);
+    const { error } = await crearRetoPersonalizado(user.uid, {
+      titulo: tituloNuevo.trim(),
+      categoria: categoriaNueva,
+      metaValor,
+      unidad: unidadNueva.trim(),
+      incrementoUnidad: null,
+    });
+    setGuardando(false);
+
+    if (error) {
+      Alert.alert("Error", "No se pudo crear el reto. Intenta de nuevo.");
+      return;
+    }
+
+    setModalVisible(false);
+    limpiarFormulario();
+    cargarRetos();
+  };
+
   const totalRetos = retos.length;
   const retosCompletadosHoy = retos.filter((r) => r.completado).length;
   const puntosGanadosHoy = retos
@@ -82,6 +152,7 @@ export default function RetosScreen() {
   }
 
   return (
+    <>
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contenido}
@@ -105,6 +176,11 @@ export default function RetosScreen() {
         </View>
       </View>
 
+      <TouchableOpacity style={styles.cajaAgregar} onPress={handleAbrirModal}>
+        <Text style={styles.cajaAgregarIcono}>+</Text>
+        <Text style={styles.cajaAgregarTexto}>Agregar reto personal</Text>
+      </TouchableOpacity>
+
       {retos.map((reto) => {
         const porcentaje = Math.round(
           (reto.progresoActual / reto.metaValor) * 100
@@ -124,9 +200,16 @@ export default function RetosScreen() {
                 </Text>
               </View>
 
-              <Text style={styles.tituloReto}>{reto.titulo}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.tituloReto}>{reto.titulo}</Text>
+                {reto.personalizado && (
+                  <Text style={styles.etiquetaPersonal}>Personal</Text>
+                )}
+              </View>
 
-              <Text style={styles.puntosReto}>+{reto.puntosOtorga}</Text>
+              {!reto.personalizado && (
+                <Text style={styles.puntosReto}>+{reto.puntosOtorga}</Text>
+              )}
             </View>
 
             <View style={styles.filaProgreso}>
@@ -176,6 +259,108 @@ export default function RetosScreen() {
         );
       })}
     </ScrollView>
+
+    <Modal
+      visible={modalVisible}
+      animationType="slide"
+      transparent
+      onRequestClose={() => setModalVisible(false)}
+    >
+      <View style={styles.fondoModal}>
+        <View style={styles.tarjetaModal}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Text style={styles.tituloModal}>Nuevo reto personal</Text>
+
+            <Text style={styles.etiquetaCampo}>Título</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej. Practicar guitarra"
+              value={tituloNuevo}
+              onChangeText={setTituloNuevo}
+            />
+
+            <Text style={styles.etiquetaCampo}>Categoría</Text>
+            <View style={styles.filaCategorias}>
+              {CATEGORIAS_DISPONIBLES.map((categoria) => {
+                const seleccionada = categoriaNueva === categoria;
+                return (
+                  <TouchableOpacity
+                    key={categoria}
+                    style={[
+                      styles.etiquetaCategoria,
+                      {
+                        backgroundColor: seleccionada
+                          ? COLORS.categoria[categoria]
+                          : COLORS.background,
+                        borderColor: seleccionada
+                          ? COLORS.categoria[categoria]
+                          : COLORS.border,
+                      },
+                    ]}
+                    onPress={() => setCategoriaNueva(categoria)}
+                  >
+                    <Text style={{ fontSize: 13 }}>{ICONOS_CATEGORIA[categoria]}</Text>
+                    <Text
+                      style={[
+                        styles.etiquetaCategoriaTexto,
+                        { color: seleccionada ? COLORS.white : COLORS.textLight },
+                      ]}
+                    >
+                      {NOMBRES_CATEGORIA[categoria]}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <View style={styles.filaDosColumnas}>
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <Text style={styles.etiquetaCampo}>Meta</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ej. 20"
+                  keyboardType="numeric"
+                  value={metaNueva}
+                  onChangeText={setMetaNueva}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.etiquetaCampo}>Unidad</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ej. min"
+                  value={unidadNueva}
+                  onChangeText={setUnidadNueva}
+                />
+              </View>
+            </View>
+
+            <View style={styles.filaBotonesModal}>
+              <TouchableOpacity
+                style={styles.botonCancelarModal}
+                onPress={() => setModalVisible(false)}
+                disabled={guardando}
+              >
+                <Text style={styles.botonCancelarModalTexto}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.botonGuardarModal}
+                onPress={handleGuardarRetoPersonal}
+                disabled={guardando}
+              >
+                {guardando ? (
+                  <ActivityIndicator size="small" color={COLORS.white} />
+                ) : (
+                  <Text style={styles.botonGuardarModalTexto}>Guardar</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+    </>
   );
 }
 
@@ -312,6 +497,121 @@ const styles = StyleSheet.create({
   botonMasTexto: {
     color: COLORS.white,
     fontSize: 13,
+    fontWeight: "600",
+  },
+  cajaAgregar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    borderStyle: "dashed",
+    borderRadius: SIZES.radius,
+    paddingVertical: 14,
+    marginBottom: 20,
+  },
+  cajaAgregarIcono: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: COLORS.primary,
+    marginRight: 8,
+  },
+  cajaAgregarTexto: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.primary,
+  },
+  etiquetaPersonal: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: COLORS.primaryDark,
+    marginTop: 2,
+  },
+  fondoModal: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+  },
+  tarjetaModal: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    maxHeight: "85%",
+  },
+  tituloModal: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  etiquetaCampo: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: COLORS.textLight,
+    marginBottom: 6,
+    marginTop: 12,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: COLORS.text,
+  },
+  filaCategorias: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  etiquetaCategoria: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    gap: 6,
+  },
+  etiquetaCategoriaTexto: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  filaDosColumnas: {
+    flexDirection: "row",
+  },
+  filaBotonesModal: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 24,
+    marginBottom: 8,
+  },
+  botonCancelarModal: {
+    flex: 1,
+    marginRight: 8,
+    paddingVertical: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: "center",
+  },
+  botonCancelarModalTexto: {
+    color: COLORS.textLight,
+    fontWeight: "600",
+  },
+  botonGuardarModal: {
+    flex: 1,
+    marginLeft: 8,
+    paddingVertical: 14,
+    borderRadius: 10,
+    backgroundColor: COLORS.primary,
+    alignItems: "center",
+  },
+  botonGuardarModalTexto: {
+    color: COLORS.white,
     fontWeight: "600",
   },
 });

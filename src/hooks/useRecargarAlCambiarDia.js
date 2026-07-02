@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
 import { AppState } from "react-native";
+import { fechaLocalTexto } from "../utils/fecha";
 
 function fechaDeHoy() {
-  return new Date().toISOString().split("T")[0];
+  return fechaLocalTexto();
 }
 
 export function useRecargarAlCambiarDia(callbackRecarga) {
